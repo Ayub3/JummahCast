@@ -1,0 +1,13 @@
+name: Push Image to ECR
+
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write

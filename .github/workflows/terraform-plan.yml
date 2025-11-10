@@ -1,0 +1,48 @@
+name: Terraform Plan (Dev)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    env:
+      AWS_REGION: eu-west-1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<DEV_ACCOUNT_ID>:role/github-oidc-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Lint Terraform
+        run: terraform fmt -check -recursive
+
+      - name: Security Scan (Snyk)
+        uses: snyk/actions/terraform@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Terraform Init
+        run: terraform -chdir=terraform/dev init -backend-config=backend.tfvars
+
+      - name: Terraform Plan
+        run: terraform -chdir=terraform/dev plan -var-file=dev.tfvars -no-color | tee plan.txt
+
+      - name: Comment Plan on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: plan.txt
