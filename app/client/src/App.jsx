@@ -1,8 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import SignUp from "./signup.jsx";
-import Login from "./Login.jsx";
+import SignUp from "./pages/Signup.jsx";
+import Login from "./pages/Login.jsx";
 
 function App() {
   return (
@@ -22,5 +22,3 @@ function App() {
 }
 
 export default App;
-
-
